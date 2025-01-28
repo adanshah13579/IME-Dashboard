@@ -1,8 +1,133 @@
-import React from "react";
-import { Typography } from "@mui/material";
+import React, { useState } from "react";
+import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { createOffer } from "../../RestApi/creatOffer";
 
-const ChatPage = () => {
-  return <Typography variant="h4">Chat Page</Typography>;
+const CreatofferPage = () => {
+  const [open, setOpen] = useState(false);  
+  const [formData, setFormData] = useState({
+    doctorId: "6798bb8b57965b3b246fa9a5", 
+    price: 20000,
+    schedule: "2025-02-10 10:00",
+    description: "Cardiologist consultation",
+    estimatedHours: 1,
+    name: "adan", 
+    profession: "software engineer", 
+  });
+
+  // Handle opening the modal
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  // Handle closing the modal
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Handle the offer form submission
+  const handleSubmit = async () => {
+    try {
+      console.log("formdta",formData);
+      
+      const response = await createOffer(formData);
+      if (response.success) {
+        alert("Offer created successfully!");
+        handleClose();  // Close the modal after successful offer creation
+      } else {
+        alert("Failed to create offer.");
+      }
+    } catch (error) {
+      console.error("Error submitting offer:", error);
+      alert("An error occurred while creating the offer.");
+    }
+  };
+
+  return (
+    <div>
+      <Typography variant="h4">Create Offer Page</Typography>
+      <Button variant="contained" color="primary" onClick={handleClickOpen}>
+        Create Offer
+      </Button>
+
+      {/* Modal */}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Create Offer</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Price"
+            name="price"
+            type="number"
+            value={formData.price}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Schedule"
+            name="schedule"
+            type="datetime-local"
+            value={formData.schedule}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <TextField
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Estimated Hours"
+            name="estimatedHours"
+            type="number"
+            value={formData.estimatedHours}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Profession"
+            name="profession"
+            value={formData.profession}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
 };
 
-export default ChatPage;
+export default CreatofferPage;

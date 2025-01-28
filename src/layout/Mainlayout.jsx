@@ -23,7 +23,7 @@ const MainLayout = () => {
     { text: "Dashboard", icon: <Dashboard />, path: "/" },
     { text: "Orders", icon: <ShoppingCart />, path: "/orders" },
     { text: "Profile", icon: <Person />, path: "/profile" },
-    { text: "Chat", icon: <Chat />, path: "/chat" },
+    { text: "Creatoffer", icon: <Chat />, path: "/creat-offer" },
     { text: "Logout", icon: <ExitToApp />, path: "/logout" },
   ];
 

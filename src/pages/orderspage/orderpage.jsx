@@ -1,23 +1,29 @@
-import React, { useState } from "react";
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, FormControl, Select, MenuItem, InputLabel, Paper, Typography } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  FormControl,
+  Select,
+  MenuItem,
+  Paper,
+  Typography,
+} from "@mui/material";
+import { getAllOffers } from "../../RestApi/creatOffer"; // Import the API call
 
-// Dummy data
-const orders = [
-  { id: 1, name: "John Doe", profession: "Doctor", orderStatus: "Pending" },
-  { id: 2, name: "Jane Smith", profession: "Nurse", orderStatus: "Completed" },
-  { id: 3, name: "Tom White", profession: "Surgeon", orderStatus: "Active" },
-  { id: 4, name: "Mary Johnson", profession: "Therapist", orderStatus: "Cancelled" },
-];
-
-// Function to get color based on the order status
 const getStatusColor = (status) => {
   switch (status) {
     case "Pending":
       return "#ff9800"; // Orange for Pending
     case "Completed":
       return "#4caf50"; // Green for Completed
-    case "Active":
-      return "#1976d2"; // Blue for Active
+    case "Accepted":
+      return "#1976d2"; // Blue for Accepted
     case "Cancelled":
       return "#f44336"; // Red for Cancelled
     default:
@@ -26,18 +32,81 @@ const getStatusColor = (status) => {
 };
 
 const OrdersPage = () => {
-  const [orderData, setOrderData] = useState(orders);
+  const [orderData, setOrderData] = useState([]);
+  const [offers, setOffers] = useState([]);
 
-  const handleStatusChange = (id, newStatus) => {
-    const updatedOrders = orderData.map((order) =>
-      order.id === id ? { ...order, orderStatus: newStatus } : order
-    );
-    setOrderData(updatedOrders);
+  useEffect(() => {
+    const fetchOffersAndOrders = async () => {
+      try {
+        const response = await getAllOffers();
+        console.log("Fetched response:", response); 
+
+        const fetchedOffers = response.offers || [];
+        setOffers(fetchedOffers);
+        
+        const fetchedOrders = fetchedOffers.map((offer) => ({
+          id: offer._id, 
+          name: offer.name, 
+          profession: offer.profession, 
+          orderStatus: offer.status, 
+        }));
+        setOrderData(fetchedOrders);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchOffersAndOrders();
+  }, []);
+  const handleStatusChange = async (newStatus) => {
+    try {
+      // Static offer ID (replace this with your desired static ID)
+      const staticOfferId = '67972f77a95d6bbfad654360';
+  
+      // Check if the status is valid
+      const validStatuses = ['Pending', 'Completed', 'Accepted', 'Cancelled'];
+      if (!validStatuses.includes(newStatus)) {
+        console.error("Invalid status selected");
+        return;
+      }
+  
+      // Static token to authenticate the request (you should replace it with a dynamic JWT token)
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OTcyZjc3YTk1ZDZiYmZhZDY1NDM2MCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3MzgwNzI0MTEsImV4cCI6MTczODY3NzIxMX0.dW_Na8wKEWFozST8imY4bHv9gz_jEp8J3QeEE_t1BRA'; // Replace with your actual token
+  
+      // Sending the PUT request to update the status of the offer
+      const response = await axios.put(
+        "http://localhost:5000/api/offer/update-status",
+        {
+          offerId: staticOfferId,   // Use static offer ID here
+          status: newStatus,  // New status selected
+        },
+        {
+          headers: {
+            "Content-Type": "application/json", 
+            "Authorization": `Bearer ${token}`,  // Attach the token in the Authorization header
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        console.log("Offer status updated successfully");
+        // Update the UI with the new status if necessary
+        const updatedOrders = orderData.map((order) =>
+          order.id === staticOfferId ? { ...order, orderStatus: newStatus } : order
+        );
+        setOrderData(updatedOrders); // Update the state with the new order data
+      } else {
+        console.error("Failed to update offer status:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error updating offer status:", error);
+    }
   };
-
   return (
     <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>Orders</Typography>
+      <Typography variant="h4" gutterBottom>
+        Orders
+      </Typography>
       <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
         <Table>
           <TableHead>
@@ -61,7 +130,7 @@ const OrdersPage = () => {
                 <TableCell>{order.profession}</TableCell>
                 <TableCell
                   sx={{
-                    color: getStatusColor(order.orderStatus), // Set text color based on status
+                    color: getStatusColor(order.orderStatus),
                     fontWeight: "bold",
                     padding: "8px 16px",
                   }}
@@ -72,12 +141,12 @@ const OrdersPage = () => {
                   <FormControl fullWidth>
                     <Select
                       value={order.orderStatus}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                      sx={{ width: "150px" ,height:"40px" }}
+                      onChange={(e) => handleStatusChange( e.target.value)}
+                      sx={{ width: "150px", height: "40px" }}
                     >
                       <MenuItem value="Pending">Pending</MenuItem>
                       <MenuItem value="Completed">Completed</MenuItem>
-                      <MenuItem value="Active">Active</MenuItem>
+                      <MenuItem value="Accepted">Accepted</MenuItem>
                       <MenuItem value="Cancelled">Cancelled</MenuItem>
                     </Select>
                   </FormControl>
