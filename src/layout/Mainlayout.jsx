@@ -24,6 +24,8 @@ const MainLayout = () => {
     { text: "Orders", icon: <ShoppingCart />, path: "/orders" },
     { text: "Profile", icon: <Person />, path: "/profile" },
     { text: "Creatoffer", icon: <Chat />, path: "/creat-offer" },
+    { text: "Chatpage", icon: <Chat />, path: "/chatpage" },
+
     { text: "Logout", icon: <ExitToApp />, path: "/logout" },
   ];
 

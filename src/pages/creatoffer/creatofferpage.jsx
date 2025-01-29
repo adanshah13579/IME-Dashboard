@@ -14,7 +14,6 @@ const CreatofferPage = () => {
     profession: "software engineer", 
   });
 
-  // Handle opening the modal
   const handleClickOpen = () => {
     setOpen(true);
   };
