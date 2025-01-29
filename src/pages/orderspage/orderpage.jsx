@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { getAllOffers } from "../../RestApi/creatOffer"; // Import the API call
+import { baseuri } from "../../baseuri/baseuri";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -75,7 +76,7 @@ const OrdersPage = () => {
   
       // Sending the PUT request to update the status of the offer
       const response = await axios.put(
-        "http://localhost:5000/api/offer/update-status",
+        `${baseuri}/api/offer/update-status`,
         {
           offerId: staticOfferId,   // Use static offer ID here
           status: newStatus,  // New status selected
@@ -94,7 +95,7 @@ const OrdersPage = () => {
         const updatedOrders = orderData.map((order) =>
           order.id === staticOfferId ? { ...order, orderStatus: newStatus } : order
         );
-        setOrderData(updatedOrders); // Update the state with the new order data
+        setOrderData(updatedOrders); 
       } else {
         console.error("Failed to update offer status:", response.data.message);
       }
