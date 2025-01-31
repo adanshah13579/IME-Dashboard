@@ -6,12 +6,10 @@ import OfferCard from "../../components/offerCard";
 const CreatofferPage = () => {
   const [open, setOpen] = useState(false);  
 
-  // Handle opening the modal
   const handleClickOpen = () => {
     setOpen(true);
   };
 
-  // Handle closing the modal
   const handleClose = () => {
     setOpen(false);
   };
@@ -25,7 +23,6 @@ const CreatofferPage = () => {
         <OfferCard/>
       </Box>
 
-      {/* Use CreateOfferModal component */}
       <CreateOfferModal open={open} handleClose={handleClose} />
     </div>
   );

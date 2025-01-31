@@ -2,7 +2,7 @@ import axios from 'axios';
 import { baseuri } from '../baseuri/baseuri';
 import Cookies from "js-cookie"; // Import Cookies
 
-export const doctorCreateProfile = async (profileData) => {
+export const createDoctorProfile = async (profileData) => {
   console.log("profileData", profileData);
 
   try {
@@ -27,48 +27,55 @@ export const doctorCreateProfile = async (profileData) => {
 };
 
 
+export const updateDoctorProfile = async (userId,profileData) => {
+  const token = Cookies.get("token"); 
+console.log("update",userId);
+console.log("profileData",profileData);
 
-export const editDoctorProfile = async (doctorId, updatedData) => {
 
-console.log(doctorId);
-  const token = Cookies.get("token");
-
-    try {
-      const response = await axios.put(`${baseuri}/api/doctor/edit-profile/${doctorrId}`, updatedData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
-        },
-        
-      });
-  
-      return response.data;
-    } catch (error) {
-      console.error("Error updating doctor profile:", error);
-      throw new Error('Failed to update doctor profile');
-    }
-  };
-
- export const getDoctorProfile = async (userId) => {
-  const token = Cookies.get("token");
-
-    try {
-      const response = await axios.get(`${baseuri}/api/doctor/getprofile/${userId}`,{ headers: {
+  try {
+    const response = await axios.put(`${baseuri}/api/doctor/updateprofile/${userId}`, profileData, {
+      headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, 
+        Authorization: `Bearer ${token}`,
       },
-      });
-      const data = await response.json();
-      
-      if (response.ok) {
-        return data; // Profile data
-      } else {
-        throw new Error(data.message || 'Failed to fetch profile');
-      }
-    } catch (error) {
-      console.error('Error fetching doctor profile:', error);
-      return null;
+    });
+    console.log("API response:", response);  // Log the full response for debugging
+
+    if (response.status === 200) {
+      return response.data; // Successfully updated
+    } else {
+      throw new Error(response.data.message || "Failed to update profile");
     }
-  };
-  
-  
+  } catch (error) {
+    console.error("Error updating doctor profile:", error);
+    return null;
+  }
+};
+
+export const getDoctorProfile = async (userId) => {
+  const token = Cookies.get("token");
+
+  console.log("getuserId", userId);
+
+  try {
+    const response = await axios.get(`${baseuri}/api/doctor/getprofile/${userId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Axios automatically parses the response data
+    const data = response.data; // This gives you the profile data
+
+    if (response.status === 200) {
+      return data; // Profile data
+    } else {
+      throw new Error(data.message || 'Failed to fetch profile');
+    }
+  } catch (error) {
+    console.error('Error fetching doctor profile:', error);
+    return null;
+  }
+};

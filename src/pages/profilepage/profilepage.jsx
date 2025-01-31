@@ -1,20 +1,24 @@
-import {
-  Box,
-  TextField,
-  Typography,
-  Button,
-  Grid,
-  Avatar,
-  IconButton,
-  Paper,
-  Input,
-  Stack,
-} from "@mui/material";
+import { jwtDecode } from "jwt-decode";  // Import jwtDecode
+import { Box, TextField, Typography, Button, Grid, Avatar, IconButton, Paper, Input, Stack } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
-import { doctorCreateProfile } from "../../RestApi/creatProfile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import { getDoctorProfile } from "../../RestApi/creatProfile";
+import { createDoctorProfile } from "../../RestApi/creatProfile";
+import { updateDoctorProfile } from "../../RestApi/creatProfile";
 
 const ProfilePage = () => {
+  const token = Cookies.get("token");
+  
+  // Decode token only if it exists
+  const decodedToken = token ? jwtDecode(token) : null;
+  console.log("Decoded token:", decodedToken);
+
+  // Access userId from the decoded token (_id)
+  const userId = decodedToken ? decodedToken.id : null; // Assuming 'id' field is inside the token
+  
+  console.log("Decoded userId:", userId); 
+
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -27,30 +31,50 @@ const ProfilePage = () => {
     income: "",
     image: null,
     video: null,
-    file: null, // For the new file upload
+    file: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [profileExists, setProfileExists] = useState(false);
 
+  // Fetch doctor profile on page load
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!userId) return;
+      
+      try {
+        const profile = await getDoctorProfile(userId);
+        console.log("Profile fetched:", profile);
+
+        if (profile) {
+          setProfileData(profile);
+          setProfileExists(true);
+        } else {
+          setProfileExists(false);
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
+    };
+
+    fetchProfile();
+  }, [userId]); // Only run when userId changes
+
+  // File Upload Function
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const response = await fetch(
-        "https://srv694651.hstgr.cloud/storage/upload",
-        {
-          method: "POST",
-          headers: {
-            "x-api-key": "ayzenn09876@",
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch("https://srv694651.hstgr.cloud/storage/upload", {
+        method: "POST",
+        headers: {
+          "x-api-key": "ayzenn09876@",
+        },
+        body: formData,
+      });
 
-      if (!response.ok) {
-        throw new Error("Error uploading file");
-      }
+      if (!response.ok) throw new Error("Error uploading file");
 
       const data = await response.json();
       return data.fileUrl;
@@ -60,11 +84,13 @@ const ProfilePage = () => {
     }
   };
 
+  // Handle text input changes
   const handleChange = (event) => {
     const { name, value } = event.target;
     setProfileData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Handle file changes
   const handleFileChange = async (event) => {
     const { name, files } = event.target;
     if (files.length > 0) {
@@ -73,37 +99,40 @@ const ProfilePage = () => {
     }
   };
 
+  // Handle form submission (Create or Update Profile)
   const handleSaveProfile = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const response = await doctorCreateProfile(profileData);
-      if (response?.status === 200) {
-        // Handle success (e.g., show a success message)
+      if (profileExists) {
+        // Update Profile
+        await updateDoctorProfile(profileData,userId);
+      } else {
+        // Create Profile
+        await createDoctorProfile(profileData);
       }
+      alert("Profile saved successfully!");
     } catch (err) {
-      setError("Cannot create profile. Please try again.");
+      setError("Failed to save profile. Please try again.");
     }
+
     setIsSubmitting(false);
   };
 
   return (
     <Box sx={{ padding: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Set Up Your Profile
+        Set Up or Update Your Profile
       </Typography>
       <Paper sx={{ padding: 3, boxShadow: 3 }}>
         <form onSubmit={handleSaveProfile}>
           <Grid container spacing={3}>
+            {/* Profile Picture */}
             <Grid item xs={12} sm={6}>
               <Typography variant="h6">Profile Picture</Typography>
-              <Avatar
-                sx={{ width: 120, height: 120 }}
-                src={profileData.image || ""}
-                alt="Profile Picture"
-              />
+              <Avatar sx={{ width: 120, height: 120 }} src={profileData.image || ""} />
               <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
                 <label htmlFor="image">
                   <Input
@@ -121,28 +150,22 @@ const ProfilePage = () => {
               </Stack>
             </Grid>
 
-            {[
-              "name",
-              "email",
-              "phone",
-              "aboutMe",
-              "location",
-              "workStatus",
-              "experience",
-              "fieldOfStudy",
-              "income",
-            ].map((field) => (
-              <Grid item xs={12} sm={6} key={field}>
-                <TextField
-                  label={field.replace(/([A-Z])/g, " $1").trim()}
-                  name={field}
-                  value={profileData[field]}
-                  onChange={handleChange}
-                  fullWidth
-                />
-              </Grid>
-            ))}
+            {/* Input Fields */}
+            {["name", "email", "phone", "aboutMe", "location", "workStatus", "experience", "fieldOfStudy", "income"].map(
+              (field) => (
+                <Grid item xs={12} sm={6} key={field}>
+                  <TextField
+                    label={field.replace(/([A-Z])/g, " $1").trim()}
+                    name={field}
+                    value={profileData[field]}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Grid>
+              )
+            )}
 
+            {/* Video Upload */}
             <Grid item xs={12} sm={6}>
               <Typography variant="h6">Resume Video</Typography>
               <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -162,7 +185,7 @@ const ProfilePage = () => {
               </Stack>
             </Grid>
 
-            {/* New file upload */}
+            {/* Sample Report */}
             <Grid item xs={12} sm={6}>
               <Typography variant="h6">Upload Your Sample Report</Typography>
               <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -172,7 +195,7 @@ const ProfilePage = () => {
                     type="file"
                     name="file"
                     onChange={handleFileChange}
-                    inputProps={{ accept: "*/*" }} // Accept all file types
+                    inputProps={{ accept: "*/*" }}
                     sx={{ display: "none" }}
                   />
                   <IconButton color="primary" component="span">
@@ -182,6 +205,7 @@ const ProfilePage = () => {
               </Stack>
             </Grid>
 
+            {/* Save Button */}
             <Grid item xs={12}>
               <Button
                 variant="contained"
