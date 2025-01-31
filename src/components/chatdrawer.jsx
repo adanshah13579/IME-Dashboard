@@ -3,22 +3,15 @@ import {
   Box,
   List,
   ListItem,
-  ListItemAvatar,
-  ListItemText,
   Typography,
   IconButton,
-  Avatar,
-  Stack,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { chatList, moreChats } from "../data/dummydata.js";
 
-const dummyAvatar = "https://example.com/dummy-avatar.jpg";
-
-const ChatDrawer = ({ setChatState }) => {
+const ChatDrawer = ({ setChatState, recentChats }) => {
   const [expandDirect, setExpandDirect] = useState(false);
-  const [activeChat, setActiveChat] = useState("Adan Shah");
+  const [activeChat, setActiveChat] = useState(null); // Initially set to null
 
   return (
     <Box
@@ -52,49 +45,45 @@ const ChatDrawer = ({ setChatState }) => {
         </IconButton>
       </Box>
 
+      {/* Dynamically render recent chats */}
       <List sx={{ marginTop: "8px" }}>
-        {chatList.map((chat, index) => (
-          <ListItem
-            key={index}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: activeChat === chat.name ? "#f0f0f0" : "white",
-              margin: "10px 0",
-              borderRadius: "12px",
-              "&:hover": {
-                backgroundColor: "#e0e0e0",
-              },
-            }}
-            onClick={() => {
-              setActiveChat(chat.name);
-              setChatState();
-            }}
-          >
-            <Avatar src={dummyAvatar} sx={{ width: 35, height: 35, marginRight: 1 }} />
-            <ListItemText primary={chat.name} secondary={chat.time} />
-            <ListItemAvatar>
-              <Stack direction="row" spacing={-1}>
-                <Avatar src={chat.avatar} sx={{ width: 35, height: 35, border: "2px solid black" }} />
-                <Avatar src={chat.groupAvatar} sx={{ width: 25, height: 25, border: "2px solid black" }} />
-              </Stack>
-            </ListItemAvatar>
-          </ListItem>
-        ))}
-
-        {expandDirect &&
-          moreChats.map((chat, index) => (
-            <ListItem key={index} sx={{ display: "flex", alignItems: "center" }}>
-              <Avatar src={dummyAvatar} sx={{ width: 35, height: 35, marginRight: 1 }} />
-              <ListItemText primary={chat.name} secondary={chat.time} />
-              <ListItemAvatar>
-                <Stack direction="row" spacing={-1}>
-                  <Avatar src={chat.avatar} sx={{ width: 35, height: 35, border: "2px solid black" }} />
-                  <Avatar src={chat.groupAvatar} sx={{ width: 25, height: 25, border: "2px solid black" }} />
-                </Stack>
-              </ListItemAvatar>
+        {recentChats.length > 0 ? (
+          recentChats.map((chat, index) => (
+            <ListItem
+              key={index}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: activeChat === chat.name ? "#f0f0f0" : "white",
+                margin: "10px 0",
+                borderRadius: "12px",
+                "&:hover": {
+                  backgroundColor: "#e0e0e0",
+                },
+              }}
+              onClick={() => {
+                setActiveChat(chat.name); // Set active chat
+                setChatState(); // Open chatbox
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <img
+                  src={chat.image || "/default-avatar.png"} // Fallback to default avatar
+                  alt={chat.name}
+                  style={{ width: 40, height: 40, borderRadius: "50%", marginRight: 10 }}
+                />
+                <Typography variant="body2" sx={{ fontSize: { xs: "14px", sm: "16px" } }}>
+                  {chat.name}
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ flex: 1, textAlign: "right" }}>
+                {chat.lastMessage} {/* Last message or empty */}
+              </Typography>
             </ListItem>
-          ))}
+          ))
+        ) : (
+          <Typography>No recent chats</Typography>
+        )}
       </List>
     </Box>
   );

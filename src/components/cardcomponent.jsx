@@ -9,11 +9,12 @@ const CardComponent = ({ title, value, icon, bgColor }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor: bgColor || "#fff",
-        color: "#fff",
+        backgroundColor:"white",
+        color: "black",
         padding: 2,
         borderRadius: "12px",
         boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+        height:"200px"
       }}
     >
       <Box>

@@ -1,10 +1,32 @@
-import { Box, IconButton, Divider, TextField, Button } from "@mui/material";
+import React, { useState } from "react";
+import { Box, IconButton, Divider, TextField, Button, Typography } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import MicIcon from "@mui/icons-material/Mic";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import CreateOfferModal from "./creatoffermodal";
 
-const Commentbox = () => {
+const Commentbox = ({ sendMessage }) => {
+  const [message, setMessage] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+
+  // Handle opening the modal
+  const handleClickOpen = () => {
+    setOpenModal(true);
+  };
+
+  // Handle closing the modal
+  const handleClose = () => {
+    setOpenModal(false);
+  };
+
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      sendMessage(message); // Send message via the prop function
+      setMessage(""); // Clear the input field after sending the message
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -17,7 +39,7 @@ const Commentbox = () => {
         flexDirection: "column",
         borderRadius: "10px",
         maxWidth: { lg: "80%" },
-        border: "1px solid #ccc", // Light border for better visibility
+        border: "1px solid #ccc",
       }}
     >
       {/* Icons Row */}
@@ -41,10 +63,15 @@ const Commentbox = () => {
           </IconButton>
         </Box>
 
-        {/* Right Side Add Icon */}
-        <IconButton sx={{ color: "black" }}>
-          <AddCircleIcon />
-        </IconButton>
+        {/* Right Side Text and Add Icon */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Typography variant="body1" sx={{ color: "black" }}>
+            Create Offer
+          </Typography>
+          <IconButton sx={{ color: "black" }} onClick={handleClickOpen}>
+            <AddCircleIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Input Field & Send Button */}
@@ -60,6 +87,8 @@ const Commentbox = () => {
           fullWidth
           variant="outlined"
           placeholder="Type a message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)} // Update the message state
           InputProps={{
             sx: {
               height: "35px",
@@ -101,6 +130,7 @@ const Commentbox = () => {
               backgroundColor: "#333",
             },
           }}
+          onClick={handleSendMessage} // Trigger sending the message
         >
           Send
         </Button>
@@ -108,6 +138,9 @@ const Commentbox = () => {
 
       {/* Divider */}
       <Divider sx={{ marginTop: "10px", backgroundColor: "#ccc" }} />
+
+      {/* Modal for creating offer */}
+      <CreateOfferModal open={openModal} handleClose={handleClose} />
     </Box>
   );
 };

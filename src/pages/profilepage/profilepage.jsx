@@ -1,63 +1,61 @@
-import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
   Typography,
   Button,
   Grid,
-  InputLabel,
-  FormControl,
-  Select,
-  MenuItem,
   Avatar,
   IconButton,
   Paper,
   Input,
   Stack,
-} from '@mui/material';
-import { PhotoCamera } from '@mui/icons-material';
-import { doctorCreateProfile, doctorEditProfile } from '../../RestApi/creatProfile';
+} from "@mui/material";
+import { PhotoCamera } from "@mui/icons-material";
+import { doctorCreateProfile } from "../../RestApi/creatProfile";
+import { useState } from "react";
 
 const ProfilePage = () => {
   const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    aboutMe: '',
-    location: '',
-    workStatus: '',
-    experience: '',
-    fieldOfStudy: '',
-    income: '',
+    name: "",
+    email: "",
+    phone: "",
+    aboutMe: "",
+    location: "",
+    workStatus: "",
+    experience: "",
+    fieldOfStudy: "",
+    income: "",
     image: null,
     video: null,
+    file: null, // For the new file upload
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isProfileSaved, setIsProfileSaved] = useState(false);
   const [error, setError] = useState(null);
-  const [doctorId, setDoctorId] = useState(null);
 
   const uploadFile = async (file) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
-      const response = await fetch('https://srv694651.hstgr.cloud/storage/upload', {
-        method: 'POST',
-        headers: {
-          'x-api-key': 'ayzenn09876@',
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        "https://srv694651.hstgr.cloud/storage/upload",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "ayzenn09876@",
+          },
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Error uploading file');
+        throw new Error("Error uploading file");
       }
 
       const data = await response.json();
       return data.fileUrl;
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error("Upload failed:", error);
       return null;
     }
   };
@@ -80,18 +78,13 @@ const ProfilePage = () => {
     setIsSubmitting(true);
     setError(null);
 
-    console.log('Profile Data before submission:', profileData);
-
     try {
-      if (isProfileSaved && doctorId) {
-        await doctorEditProfile(doctorId, profileData);
-      } else {
-        const response = await doctorCreateProfile(profileData);
-        setDoctorId(response.data._id);
+      const response = await doctorCreateProfile(profileData);
+      if (response?.status === 200) {
+        // Handle success (e.g., show a success message)
       }
-      setIsProfileSaved(true);
     } catch (err) {
-      setError('Failed to save profile. Please try again.');
+      setError("Cannot create profile. Please try again.");
     }
     setIsSubmitting(false);
   };
@@ -99,7 +92,7 @@ const ProfilePage = () => {
   return (
     <Box sx={{ padding: 3 }}>
       <Typography variant="h4" gutterBottom>
-        {isProfileSaved ? 'Edit Your Profile' : 'Set Up Your Profile'}
+        Set Up Your Profile
       </Typography>
       <Paper sx={{ padding: 3, boxShadow: 3 }}>
         <form onSubmit={handleSaveProfile}>
@@ -108,7 +101,7 @@ const ProfilePage = () => {
               <Typography variant="h6">Profile Picture</Typography>
               <Avatar
                 sx={{ width: 120, height: 120 }}
-                src={profileData.image || ''}
+                src={profileData.image || ""}
                 alt="Profile Picture"
               />
               <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -118,8 +111,8 @@ const ProfilePage = () => {
                     type="file"
                     name="image"
                     onChange={handleFileChange}
-                    inputProps={{ accept: 'image/*' }}
-                    sx={{ display: 'none' }}
+                    inputProps={{ accept: "image/*" }}
+                    sx={{ display: "none" }}
                   />
                   <IconButton color="primary" component="span">
                     <PhotoCamera />
@@ -128,10 +121,20 @@ const ProfilePage = () => {
               </Stack>
             </Grid>
 
-            {[ 'name', 'email', 'phone', 'aboutMe', 'location', 'workStatus', 'experience', 'fieldOfStudy', 'income' ].map((field) => (
+            {[
+              "name",
+              "email",
+              "phone",
+              "aboutMe",
+              "location",
+              "workStatus",
+              "experience",
+              "fieldOfStudy",
+              "income",
+            ].map((field) => (
               <Grid item xs={12} sm={6} key={field}>
                 <TextField
-                  label={field.replace(/([A-Z])/g, ' $1').trim()}
+                  label={field.replace(/([A-Z])/g, " $1").trim()}
                   name={field}
                   value={profileData[field]}
                   onChange={handleChange}
@@ -149,8 +152,28 @@ const ProfilePage = () => {
                     type="file"
                     name="video"
                     onChange={handleFileChange}
-                    inputProps={{ accept: 'video/*' }}
-                    sx={{ display: 'none' }}
+                    inputProps={{ accept: "video/*" }}
+                    sx={{ display: "none" }}
+                  />
+                  <IconButton color="primary" component="span">
+                    <PhotoCamera />
+                  </IconButton>
+                </label>
+              </Stack>
+            </Grid>
+
+            {/* New file upload */}
+            <Grid item xs={12} sm={6}>
+              <Typography variant="h6">Upload Your Sample Report</Typography>
+              <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                <label htmlFor="file">
+                  <Input
+                    id="file"
+                    type="file"
+                    name="file"
+                    onChange={handleFileChange}
+                    inputProps={{ accept: "*/*" }} // Accept all file types
+                    sx={{ display: "none" }}
                   />
                   <IconButton color="primary" component="span">
                     <PhotoCamera />
@@ -167,7 +190,7 @@ const ProfilePage = () => {
                 fullWidth
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Saving...' : isProfileSaved ? 'Update Profile' : 'Save Profile'}
+                {isSubmitting ? "Saving..." : "Save Profile"}
               </Button>
             </Grid>
           </Grid>

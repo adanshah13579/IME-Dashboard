@@ -1,8 +1,7 @@
-import React, { useState } from "react"; 
-import { Box, Typography, IconButton, Avatar } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography, Avatar } from "@mui/material";
 
-
-const ChatMessage = ({ avatar, name, time, message }) => {
+const ChatMessage = ({avatar,message, time, senderType }) => {
   const [hover, setHover] = useState(false);
 
   return (
@@ -19,8 +18,11 @@ const ChatMessage = ({ avatar, name, time, message }) => {
         },
       }}
     >
-      <Avatar src={avatar} sx={{ width: 32, height: 32 }} />
-
+        <Avatar 
+        src={avatar} 
+        alt={senderType} 
+        sx={{ width: 25, height: 25 }} 
+      />
       <Box sx={{ flex: 1 }}>
         <Typography
           sx={{
@@ -35,9 +37,9 @@ const ChatMessage = ({ avatar, name, time, message }) => {
             gap: 1,
           }}
         >
-          {name}
+          {senderType || "Unknown User"} {/* Display senderType or fallback */}
           <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: "black" }}>
-            {time}
+            {time || "Unknown Time"} {/* Display time or fallback */}
           </Typography>
         </Typography>
 

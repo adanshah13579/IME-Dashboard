@@ -1,9 +1,10 @@
-import axios from 'axios';
-import { baseuri } from '../baseuri/baseuri';
+import axios from "axios";
+import Cookies from "js-cookie";
+import { baseuri } from "../baseuri/baseuri";
 
 export const createOffer = async (offerData) => {
   try {
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OTZhZmVjNzdiM2JkYWE2ODdhMDkxMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzM3OTcxNjYwLCJleHAiOjE3Mzg1NzY0NjB9.BjJ_ii6kX2fMPNlrEoHITmU6gpRHLASQLikTONGRxfk'
+    const token = Cookies.get("token");
     const response = await axios.post(`${baseuri}/api/offer/creat-offer`, offerData, 
         {
             headers: {
@@ -18,32 +19,46 @@ export const createOffer = async (offerData) => {
   }
 };
 
+export const getDoctorOffers = async () => {
+  try {
+    const token = Cookies.get("token");
+    if (!token) throw new Error("No authentication token found");
 
-export const getAllOffers = async () => {
+    const response = await axios.get(`${baseuri}/api/offer/doctor-offers`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return response.data.offers || [];
+  } catch (error) {
+    console.error("Error fetching doctor's offers:", error);
+    return [];
+  }
+};
+
+export const updateOfferStatus = async (offerId, status) => {
+  try {
+    const token = Cookies.get("token");
+    if (!token) throw new Error("No authentication token found");
+
+    const response = await axios.put(
+      `${baseuri}/api/offer/update-status`,
+      { _id: offerId, status },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return response.data.success;
+  } catch (error) {
+    console.error("Error updating offer status:", error);
+    return false;
+  }
+};
+
+
+
+export const getOfferr = async (offerId) => {
     try {
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OTZhZmVjNzdiM2JkYWE2ODdhMDkxMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzM3OTcxNjYwLCJleHAiOjE3Mzg1NzY0NjB9.BjJ_ii6kX2fMPNlrEoHITmU6gpRHLASQLikTONGRxfk';
-      const response = await axios.get(
-        `${baseuri}/api/offer/get-all-offers`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Add the token here
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching all offers:", error);
-      throw new Error('Failed to fetch all offers');
-    }
-  };
+      const token = Cookies.get("token");
 
-
-
-
-export const getOffer = async (offerId) => {
-    try {
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OTZhZmVjNzdiM2JkYWE2ODdhMDkxMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzM3OTcxNjYwLCJleHAiOjE3Mzg1NzY0NjB9.BjJ_ii6kX2fMPNlrEoHITmU6gpRHLASQLikTONGRxfk';
       const response = await axios.get(
         `${baseuri}/api/offer/get-offer/${offerId}`,
         {

@@ -1,8 +1,44 @@
-// CreateOfferModal.jsx
 import React, { useState } from "react";
 import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { createOffer } from "../RestApi/creatOffer";
 
-const CreateOfferModal = ({ open, handleClose, handleInputChange, formData, handleSubmit }) => {
+const CreateOfferModal = ({ open, handleClose }) => {
+  const [formData, setFormData] = useState({
+    doctorId: "6798bb8b57965b3b246fa9a5", 
+    price: 20000,
+    schedule: "2025-02-10 10:00",
+    description: "Cardiologist consultation",
+    estimatedHours: 1,
+    name: "adan", 
+    profession: "software engineer", 
+  });
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Handle the offer form submission
+  const handleSubmit = async () => {
+    try {
+      console.log("formdta", formData);
+      const response = await createOffer(formData);
+      if (response.success) {
+        alert("Offer created successfully!");
+        handleClose();  // Close the modal after successful offer creation
+      } else {
+        alert("Failed to create offer.");
+      }
+    } catch (error) {
+      console.error("Error submitting offer:", error);
+      alert("An error occurred while creating the offer.");
+    }
+  };
+
   return (
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>Create Offer</DialogTitle>
