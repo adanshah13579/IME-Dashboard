@@ -27,10 +27,10 @@ export const createDoctorProfile = async (profileData) => {
 };
 
 
-export const updateDoctorProfile = async (userId,profileData) => {
+export const updateDoctorProfile = async (profileData,userId) => {
   const token = Cookies.get("token"); 
 console.log("update",userId);
-console.log("profileData",profileData);
+console.log("updateprofileData",profileData);
 
 
   try {
@@ -66,8 +66,7 @@ export const getDoctorProfile = async (userId) => {
       },
     });
 
-    // Axios automatically parses the response data
-    const data = response.data; // This gives you the profile data
+    const data = response.data; 
 
     if (response.status === 200) {
       return data; // Profile data

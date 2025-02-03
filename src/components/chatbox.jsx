@@ -1,83 +1,103 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ChatMessage from "./chatmessage.jsx"; // Ensure the file path is correct
-import Commentbox from "./commentbox.jsx"; // Ensure the file path is correct
+import ChatMessage from "./chatmessage.jsx";
+import Commentbox from "./commentbox.jsx";
 import { io } from "socket.io-client";
-import Cookies from "js-cookie"; // Import js-cookie
+import Cookies from "js-cookie";
 import { formatDistanceToNow } from "date-fns";
+import OfferCard from "./offerdetails.jsx"; // Import the OfferCard component
 
-const Chatbox = ({ setChatState }) => {
+const Chatbox = ({ setChatState, selectedUser, name }) => {
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
 
   const token = Cookies.get("token");
 
-  
-
-
   useEffect(() => {
-    console.log("test" + token);
-    
-    const newSocket = io("ws://localhost:3001?token="+token, {
+    if (!selectedUser?.id) return;
+
+    const newSocket = io("ws://localhost:3001?token=" + token, {
       transports: ["websocket"],
-      forceNew: true,  // Ensures a fresh connection
-      reconnectionAttempts: 5, // Try reconnecting 5 times
-      timeout: 10000, // 5 seconds timeout
+      forceNew: true,
+      reconnectionAttempts: 5,
+      timeout: 10000,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(newSocket);
-    
 
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
       console.log("Connected to WebSocket server");
+
+      newSocket.emit("get_recent_messages", { userId: selectedUser.id });
     });
-    
+
     newSocket.on("receive_message", (data) => {
-      console.log("Received data:", data);
-    
+      console.log("Received message data:", data);
+
       if (data.type === "newChatMessage") {
-        console.log("Processed message:", data);
-    
-        // Check if createdAt is valid
         const createdAt = data.createdAt ? new Date(data.createdAt) : null;
-    
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            senderType: data.senderType,
-            createdAt: createdAt
-              ? formatDistanceToNow(createdAt, { addSuffix: true })
-              : "Just now",
-            message: data.message,
-          },
-        ]);
+
+        if (data.receiverId === selectedUser.id || data.senderId === selectedUser.id) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              senderType: data.senderType,
+              createdAt: createdAt
+                ? formatDistanceToNow(createdAt, { addSuffix: true })
+                : "Just now",
+              message: data.message,
+              offerDetails: data.offerDetails || null, // Add offerDetails if they exist
+            },
+          ]);
+        }
+      }
+
+      if (data.type === "recentChats") {
+        const filteredMessages = data.recentMessages.recentMessages.filter(
+          (msg) => msg.sender === selectedUser.id || msg.receiver === selectedUser.id
+        );
+
+        const formattedMessages = filteredMessages.map((msg) => ({
+          senderType: msg.senderType,
+          createdAt: msg.createdAt
+            ? formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })
+            : "Just now",
+          message: msg.message,
+          offerDetails: msg.offerDetails || null, // Add offerDetails if they exist
+        }));
+
+        setMessages(formattedMessages);
       }
     });
-    
-    newSocket.emit("get_recent_messages");
 
     return () => {
       newSocket.disconnect();
     };
-  }, [token]); 
+  }, [token, selectedUser]);
 
   const sendMessage = (message) => {
-    console.log("message", message);
-
     if (!socket) {
       console.error("Socket not initialized");
       return;
     }
 
-    const receiverId = "6796afec77b3bdaa687a0911";
+    const receiverId = selectedUser?.id;
     socket.emit("send_message", { receiverId, message });
   };
 
+  const sendOffer = (offerDetails) => {
+    if (!socket) {
+      console.error("Socket not initialized");
+      return;
+    }
+
+    const receiverId = selectedUser?.id;
+    socket.emit("send_offer", { receiverId, offerDetails });
+  };
 
   return (
     <Box
@@ -102,21 +122,26 @@ const Chatbox = ({ setChatState }) => {
           </IconButton>
         </Box>
         <Typography sx={{ flex: 1, fontSize: "20px", fontWeight: "bold" }}>
-          Chat Heading
+          {name?.name || "User"}
         </Typography>
       </Box>
 
       <Box sx={{ flex: 1, padding: "20px 10px", overflowY: "auto" }}>
-        {messages.map((msg, index) => (
-          <ChatMessage
-            key={index}
-            avatar={msg.avatar}
-
-            senderType={msg.senderType}
-            time={msg.createdAt}
-            message={msg.message}
-          />
-        ))}
+        {messages.length === 0 ? (
+          <Typography>No messages yet...</Typography>
+        ) : (
+          messages.map((msg, index) => (
+            <div key={index}>
+              <ChatMessage
+                senderType={msg.senderType}
+                time={msg.createdAt}
+                message={msg.message}
+              />
+              {/* If the message is an offer, render the OfferCard */}
+              {msg.offerDetails && <OfferCard offerDetails={msg.offerDetails} />}
+            </div>
+          ))
+        )}
       </Box>
 
       <Box
@@ -127,7 +152,7 @@ const Chatbox = ({ setChatState }) => {
           backgroundColor: "white",
         }}
       >
-        <Commentbox sendMessage={sendMessage} />
+        <Commentbox sendMessage={sendMessage} sendOffer={sendOffer} />
       </Box>
     </Box>
   );

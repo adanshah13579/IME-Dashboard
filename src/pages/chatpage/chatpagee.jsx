@@ -10,9 +10,13 @@ const ChatsystemPage = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [recentChats, setRecentChats] = useState([]); // Store recent chats
   const [socket, setSocket] = useState(null); // Socket connection state
-  const [messages, setMessages] = useState([]); // Store chat messages
-  
+  const [selectedUser, setSelectedUser] = useState(null); // Track selected user
+  const [name, setname ] = useState(""); // Track selected user
+
+
   const token = Cookies.get("token");
+  const userId = "67972f77a95d6bbfad654360";
+  const userType = "doctor";
 
   useEffect(() => {
     const newSocket = io("ws://localhost:3001?token=" + token, {
@@ -29,42 +33,38 @@ const ChatsystemPage = () => {
 
     newSocket.on("connect", () => {
       console.log("Connected to WebSocket server");
+      newSocket.emit("get_chat_list", { userId, userType });
     });
 
     newSocket.on("receive_message", (data) => {
-      console.log("data",data);
-      
-      if (data.type === "newChatMessage") {
-        const createdAt = data.createdAt ? new Date(data.createdAt) : null;
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            senderType: data.senderType,
-            createdAt: createdAt ? formatDistanceToNow(createdAt, { addSuffix: true }) : "Just now",
-            message: data.message,
-          },
-        ]);
-      }
-    });
 
-    // Fetch recent messages
-    newSocket.emit("get_recent_messages", (recentMessages) => {
-      setRecentChats(recentMessages);
+      if (data.type === "chatlist") {
+        const formattedChats = data.chatlist.map((chat) => ({
+          _id: chat._id, // Chat partner's ID
+          name: chat.name, // Chat partner's name
+          image: chat.image, // Chat partner's image
+          lastMessage: chat.lastMessage, // Last message
+          lastMessageTime: chat.lastMessageTime, // Timestamp
+        }));
+
+        setRecentChats(formattedChats);
+      }
     });
 
     return () => {
       newSocket.disconnect();
     };
-  }, [token]);
+  }, [token, userId, userType]);
 
-  const sendMessage = (message) => {
-    if (!socket) {
-      console.error("Socket not initialized");
-      return;
-    }
-
-    const receiverId = "6796afec77b3bdaa687a0911"; 
-    socket.emit("send_message", { receiverId, message });
+  const handleChatSelection = (chatId) => {
+    
+    setSelectedUser({ id: chatId,});
+    setChatOpen(true); 
+  };
+  const handlename = ( chatName) => {
+    
+    setname({  name: chatName });
+    setChatOpen(true); 
   };
 
   return (
@@ -72,14 +72,15 @@ const ChatsystemPage = () => {
       sx={{
         display: "flex",
         width: "100%",
-        height: "auto",
+        height: "100vh",
         flexDirection: {
           xs: "column",
           sm: "row",
         },
+        justifyContent: "flex-start",
+        alignItems: "stretch",
       }}
     >
-      {/* Chat Drawer */}
       <Box
         sx={{
           flex: 1,
@@ -87,30 +88,37 @@ const ChatsystemPage = () => {
           backgroundColor: "white",
           p: 2,
           display: {
-            xs: chatOpen ? "" : "none", 
+            xs: chatOpen ? "block" : "none",
             sm: "block",
           },
         }}
       >
-        <ChatDrawer setChatState={() => setChatOpen(!chatOpen)} recentChats={recentChats} />
+        <ChatDrawer
+          setChatState={handleChatSelection}
+          setname ={handlename}
+          recentChats={recentChats}
+        />
       </Box>
 
-      {/* Chatbox */}
-      {!chatOpen && (
-        <Box
-          sx={{
-            flex: 3,
-            display: "flex",
-            flexDirection: "column",
-            height: "auto",
-            width: "100%",
-            backgroundColor: "white",
-            p: 2,
-          }}
-        >
-          <Chatbox setChatState={() => setChatOpen(!chatOpen)} messages={messages} sendMessage={sendMessage} />
-        </Box>
-      )}
+      <Box
+        sx={{
+          flex: 3,
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          width: "100%",
+          backgroundColor: "white",
+          p: 2,
+        }}
+      >
+        {selectedUser && (
+          <Chatbox
+            setChatState={() => setChatOpen(!chatOpen)}
+            selectedUser={selectedUser}
+            name={name} 
+          />
+        )}
+      </Box>
     </Box>
   );
 };

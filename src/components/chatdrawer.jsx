@@ -9,9 +9,17 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-const ChatDrawer = ({ setChatState, recentChats }) => {
+const ChatDrawer = ({ setChatState, recentChats,setname }) => {
   const [expandDirect, setExpandDirect] = useState(false);
   const [activeChat, setActiveChat] = useState(null); // Initially set to null
+
+  // Handle user selection and pass user ID to the parent
+  const handleChatSelection = (chat) => {
+    setActiveChat(chat.name); // Set active chat for UI
+    setChatState(chat._id);
+    setname(chat.name); // Set active chat for UI
+    // Pass the selected user ID to setChatState (this could open the chat box)
+  };
 
   return (
     <Box
@@ -20,7 +28,7 @@ const ChatDrawer = ({ setChatState, recentChats }) => {
           xs: "100%", // Full width on small screens
           sm: 320, // Fixed width for larger screens
         },
-        height: "92vh",
+        height: "100vh",
         borderRadius: "10px",
         backgroundColor: "white",
         color: "black",
@@ -61,10 +69,7 @@ const ChatDrawer = ({ setChatState, recentChats }) => {
                   backgroundColor: "#e0e0e0",
                 },
               }}
-              onClick={() => {
-                setActiveChat(chat.name); // Set active chat
-                setChatState(); // Open chatbox
-              }}
+              onClick={() => handleChatSelection(chat)} // Set chat and pass user ID
             >
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <img
@@ -77,7 +82,7 @@ const ChatDrawer = ({ setChatState, recentChats }) => {
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ flex: 1, textAlign: "right" }}>
-                {chat.lastMessage} {/* Last message or empty */}
+                {chat.lastMessage} 
               </Typography>
             </ListItem>
           ))

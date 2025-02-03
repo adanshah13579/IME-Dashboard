@@ -1,5 +1,16 @@
-import { jwtDecode } from "jwt-decode";  // Import jwtDecode
-import { Box, TextField, Typography, Button, Grid, Avatar, IconButton, Paper, Input, Stack } from "@mui/material";
+import { jwtDecode } from "jwt-decode"; // Import jwtDecode
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  Grid,
+  Avatar,
+  IconButton,
+  Paper,
+  Input,
+  Stack,
+} from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
@@ -9,15 +20,15 @@ import { updateDoctorProfile } from "../../RestApi/creatProfile";
 
 const ProfilePage = () => {
   const token = Cookies.get("token");
-  
+
   // Decode token only if it exists
   const decodedToken = token ? jwtDecode(token) : null;
   console.log("Decoded token:", decodedToken);
 
   // Access userId from the decoded token (_id)
   const userId = decodedToken ? decodedToken.id : null; // Assuming 'id' field is inside the token
-  
-  console.log("Decoded userId:", userId); 
+
+  console.log("Decoded userId:", userId);
 
   const [profileData, setProfileData] = useState({
     name: "",
@@ -41,7 +52,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userId) return;
-      
+
       try {
         const profile = await getDoctorProfile(userId);
         console.log("Profile fetched:", profile);
@@ -66,13 +77,16 @@ const ProfilePage = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("https://srv694651.hstgr.cloud/storage/upload", {
-        method: "POST",
-        headers: {
-          "x-api-key": "ayzenn09876@",
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        "https://srv694651.hstgr.cloud/storage/upload",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "ayzenn09876@",
+          },
+          body: formData,
+        }
+      );
 
       if (!response.ok) throw new Error("Error uploading file");
 
@@ -98,8 +112,6 @@ const ProfilePage = () => {
       setProfileData((prevData) => ({ ...prevData, [name]: fileUrl }));
     }
   };
-
-  // Handle form submission (Create or Update Profile)
   const handleSaveProfile = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -108,12 +120,14 @@ const ProfilePage = () => {
     try {
       if (profileExists) {
         // Update Profile
-        await updateDoctorProfile(profileData,userId);
+        await updateDoctorProfile(profileData, userId);
+        alert("Profile updated successfully!");
       } else {
         // Create Profile
         await createDoctorProfile(profileData);
+        setProfileExists(true); // Mark profile as created
+        alert("Profile created successfully!");
       }
-      alert("Profile saved successfully!");
     } catch (err) {
       setError("Failed to save profile. Please try again.");
     }
@@ -122,17 +136,20 @@ const ProfilePage = () => {
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box sx={{ padding: 3 ,backgroundColor:"linear-gradient(145deg, #F4FBFF, #FFFFFF)" }}>
       <Typography variant="h4" gutterBottom>
         Set Up or Update Your Profile
       </Typography>
-      <Paper sx={{ padding: 3, boxShadow: 3 }}>
+      <Paper sx={{ padding: 3, boxShadow: 3 ,backgroundColor:"linear-gradient(145deg, #F4FBFF, #FFFFFF)"}}>
         <form onSubmit={handleSaveProfile}>
           <Grid container spacing={3}>
             {/* Profile Picture */}
             <Grid item xs={12} sm={6}>
               <Typography variant="h6">Profile Picture</Typography>
-              <Avatar sx={{ width: 120, height: 120 }} src={profileData.image || ""} />
+              <Avatar
+                sx={{ width: 120, height: 120 }}
+                src={profileData.image || ""}
+              />
               <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
                 <label htmlFor="image">
                   <Input
@@ -151,19 +168,27 @@ const ProfilePage = () => {
             </Grid>
 
             {/* Input Fields */}
-            {["name", "email", "phone", "aboutMe", "location", "workStatus", "experience", "fieldOfStudy", "income"].map(
-              (field) => (
-                <Grid item xs={12} sm={6} key={field}>
-                  <TextField
-                    label={field.replace(/([A-Z])/g, " $1").trim()}
-                    name={field}
-                    value={profileData[field]}
-                    onChange={handleChange}
-                    fullWidth
-                  />
-                </Grid>
-              )
-            )}
+            {[
+              "name",
+              "email",
+              "phone",
+              "aboutMe",
+              "location",
+              "workStatus",
+              "experience",
+              "fieldOfStudy",
+              "income",
+            ].map((field) => (
+              <Grid item xs={12} sm={6} key={field}>
+                <TextField
+                  label={field.replace(/([A-Z])/g, " $1").trim()}
+                  name={field}
+                  value={profileData[field]}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+            ))}
 
             {/* Video Upload */}
             <Grid item xs={12} sm={6}>
@@ -214,7 +239,11 @@ const ProfilePage = () => {
                 fullWidth
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Saving..." : "Save Profile"}
+                {isSubmitting
+                  ? "Saving..."
+                  : profileExists
+                  ? "Update Profile"
+                  : "Save Profile"}
               </Button>
             </Grid>
           </Grid>

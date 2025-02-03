@@ -1,20 +1,19 @@
-// src/components/CardComponent.jsx
 import React from "react";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 
-const CardComponent = ({ title, value, icon, bgColor }) => {
+const CardComponent = ({ title, value, icon }) => {
   return (
     <Card
       sx={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor:"white",
+        background: "linear-gradient(145deg, #F4FBFF, #FFFFFF)", // Gradient applied here
         color: "black",
         padding: 2,
         borderRadius: "12px",
         boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-        height:"200px"
+        height: "200px",
       }}
     >
       <Box>

@@ -8,6 +8,7 @@ import ChatsystemPage from "./pages/chatpage/chatpagee";
 import SigninPage from "./pages/Auth/signinpage";
 import SignUpPage from "./pages/Auth/signuppage";
 import GetProfilePage from "./pages/getprofilepage/getprofilepage";
+import "./index.css"
 
 const App = () => {
   return (
@@ -21,7 +22,7 @@ const App = () => {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/create-profile" element={<ProfilePage />} />
-        <Route path="/creat-offer" element={<CreatofferPage />} />
+        <Route path="/create-offer" element={<CreatofferPage />} />
         <Route path="/chatpage" element={<ChatsystemPage />} />
         <Route path="/profile" element={<GetProfilePage />} />
 

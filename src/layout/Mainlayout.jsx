@@ -9,7 +9,15 @@ import {
   ListItemText,
   Toolbar,
 } from "@mui/material";
-import { Dashboard, ShoppingCart, Person, Chat, ExitToApp } from "@mui/icons-material";
+import {
+  Home,
+  Assignment,
+  PersonAdd,
+  AccountCircle,
+  AddCircle,
+  Forum,
+  Logout,
+} from "@mui/icons-material"; // Updated icons
 import { useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom"; // For rendering nested routes
 import axios from "axios"; // Import axios for API call
@@ -23,13 +31,13 @@ const MainLayout = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { text: "Dashboard", icon: <Dashboard />, path: "/" },
-    { text: "Orders", icon: <ShoppingCart />, path: "/orders" },
-    { text: "Creat-Profile", icon: <Person />, path: "/create-profile" },
-    { text: "Profile", icon: <Person />, path: "/profile" },
-    { text: "Creatoffer", icon: <Chat />, path: "/creat-offer" },
-    { text: "Chatpage", icon: <Chat />, path: "/chatpage" },
-    { text: "Logout", icon: <ExitToApp />, path: "/signin" },
+    { text: "Dashboard", icon: <Home />, path: "/" },
+    { text: "Orders", icon: <Assignment />, path: "/orders" },
+    { text: "Create Profile", icon: <PersonAdd />, path: "/create-profile" },
+    { text: "Profile", icon: <AccountCircle />, path: "/profile" },
+    { text: "Create Offer", icon: <AddCircle />, path: "/create-offer" },
+    { text: "Chat", icon: <Forum />, path: "/chatpage" },
+    { text: "Logout", icon: <Logout />, path: "/signin" },
   ];
 
   const handleLogout = async () => {
@@ -38,12 +46,15 @@ const MainLayout = () => {
       await axios.post(`${baseuri}/api/auth/logout`);
 
       // Remove the token from cookies
-      Cookies.remove('token');  // Modify if you're using a different cookie name
+      Cookies.remove("token"); // Modify if you're using a different cookie name
 
       // Navigate to the Sign-in page after logout
-      navigate('/signin');
+      navigate("/signin");
     } catch (error) {
-      console.error("Logout failed:", error.response ? error.response.data : error.message);
+      console.error(
+        "Logout failed:",
+        error.response ? error.response.data : error.message
+      );
     }
   };
 
@@ -59,6 +70,8 @@ const MainLayout = () => {
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
+            backgroundColor: "#FFFFFF", // White background for sidebar
+            borderRight: "1px solid #E0E0E0", // Subtle border for separation
           },
         }}
       >
@@ -66,34 +79,45 @@ const MainLayout = () => {
         <Toolbar
           sx={{
             display: "flex",
-            justifyContent: "flex-start",
-            padding: "1rem 0",
-            color: "white",
+            justifyContent: "start",
+            padding: "1.5rem 0",
+            backgroundColor: "#FFFFFF", // Match sidebar background
           }}
         >
           <img
             src={logo}
             alt="Logo"
-            style={{ width: "75%", height: "auto" }}
+            style={{ width: "90%", height: "auto" }} // Keep logo in original colors
           />
         </Toolbar>
 
         {/* Navigation Links */}
-        <List>
+        <List sx={{p:1}}>
           {menuItems.map((item, index) => (
-            <ListItem 
-              button 
-              key={index} 
+            <ListItem
+              button
+              key={index}
               onClick={() => {
                 if (item.text === "Logout") {
-                  handleLogout();  // Call the logout handler on "Logout" click
+                  handleLogout(); // Call the logout handler on "Logout" click
                 } else {
-                  navigate(item.path);  // Navigate to other paths
+                  navigate(item.path); // Navigate to other paths
                 }
               }}
+              sx={{
+
+                borderRadius:"10px" ,
+                p:1,
+                "&:hover": {
+                  backgroundColor: "#000000", // Black background on hover
+                  "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+                    color: "#FFFFFF", // White text and icons on hover
+                  },
+                },
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon sx={{ color: "#000000" }}>{item.icon}</ListItemIcon> {/* Black icons by default */}
+              <ListItemText primary={item.text} sx={{ color: "#000000" }} /> {/* Black text by default */}
             </ListItem>
           ))}
         </List>
@@ -102,9 +126,14 @@ const MainLayout = () => {
       {/* Page Content */}
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 1 }}
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          backgroundColor: "#FFFFFF", // White background for content area
+          minHeight: "100vh",
+        }}
       >
-        <Toolbar />
+        {/* <Toolbar /> */}
         <Outlet /> {/* This renders the child route components */}
       </Box>
     </Box>

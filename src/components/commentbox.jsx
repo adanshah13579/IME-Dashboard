@@ -1,30 +1,58 @@
 import React, { useState } from "react";
-import { Box, IconButton, Divider, TextField, Button, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Divider,
+  TextField,
+  Button,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import MicIcon from "@mui/icons-material/Mic";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import CreateOfferModal from "./creatoffermodal";
 
-const Commentbox = ({ sendMessage }) => {
+const Commentbox = ({ sendMessage, sendOffer,  }) => {
   const [message, setMessage] = useState("");
-  const [openModal, setOpenModal] = useState(false);
-
-  // Handle opening the modal
-  const handleClickOpen = () => {
-    setOpenModal(true);
-  };
-
-  // Handle closing the modal
-  const handleClose = () => {
-    setOpenModal(false);
-  };
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [offerDetails, setOfferDetails] = useState({
+    name: "adan", // User's name
+    profession: "software eng", // Profession
+    price: "",
+    schedule: "",
+    estimatedHours: "",
+    description: "",
+  });
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      sendMessage(message); // Send message via the prop function
+      sendMessage({ type: "text", message }); // Send normal text message
       setMessage(""); // Clear the input field after sending the message
     }
+  };
+
+  const handleOpenOfferModal = () => setOfferModalOpen(true);
+  const handleCloseOfferModal = () => setOfferModalOpen(false);
+
+  const handleSendOffer = () => {
+    sendOffer({
+      type: "offer",
+      ...offerDetails,
+    });
+
+    setOfferModalOpen(false);
+    setOfferDetails({
+      name:  "",
+      profession:  "",
+      price: "",
+      schedule: "",
+      estimatedHours: "",
+      description: "",
+    });
   };
 
   return (
@@ -68,7 +96,7 @@ const Commentbox = ({ sendMessage }) => {
           <Typography variant="body1" sx={{ color: "black" }}>
             Create Offer
           </Typography>
-          <IconButton sx={{ color: "black" }} onClick={handleClickOpen}>
+          <IconButton sx={{ color: "black" }} onClick={handleOpenOfferModal}>
             <AddCircleIcon />
           </IconButton>
         </Box>
@@ -88,12 +116,12 @@ const Commentbox = ({ sendMessage }) => {
           variant="outlined"
           placeholder="Type a message"
           value={message}
-          onChange={(e) => setMessage(e.target.value)} // Update the message state
+          onChange={(e) => setMessage(e.target.value)}
           InputProps={{
             sx: {
               height: "35px",
               color: "black",
-              backgroundColor: "#f5f5f5", // Light gray background for input
+              backgroundColor: "#f5f5f5",
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#ccc",
               },
@@ -130,7 +158,7 @@ const Commentbox = ({ sendMessage }) => {
               backgroundColor: "#333",
             },
           }}
-          onClick={handleSendMessage} // Trigger sending the message
+          onClick={handleSendMessage}
         >
           Send
         </Button>
@@ -139,8 +167,63 @@ const Commentbox = ({ sendMessage }) => {
       {/* Divider */}
       <Divider sx={{ marginTop: "10px", backgroundColor: "#ccc" }} />
 
-      {/* Modal for creating offer */}
-      <CreateOfferModal open={openModal} handleClose={handleClose} />
+      {/* Offer Modal */}
+      <Dialog open={offerModalOpen} onClose={handleCloseOfferModal}>
+        <DialogTitle>Create an Offer</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="User Name"
+            fullWidth
+            value={offerDetails.name}
+            onChange={(e) => setOfferDetails({ ...offerDetails, name: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <TextField
+            label="Profession"
+            fullWidth
+            value={offerDetails.profession}
+            onChange={(e) => setOfferDetails({ ...offerDetails, profession: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <TextField
+            label="Price"
+            fullWidth
+            type="number"
+            value={offerDetails.price}
+            onChange={(e) => setOfferDetails({ ...offerDetails, price: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <TextField
+            label="Schedule (e.g., Monday 3 PM)"
+            fullWidth
+            value={offerDetails.schedule}
+            onChange={(e) => setOfferDetails({ ...offerDetails, schedule: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <TextField
+            label="Estimated Hours"
+            fullWidth
+            type="number"
+            value={offerDetails.estimatedHours}
+            onChange={(e) => setOfferDetails({ ...offerDetails, estimatedHours: e.target.value })}
+            sx={{ marginBottom: 2 }}
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            rows={3}
+            value={offerDetails.description}
+            onChange={(e) => setOfferDetails({ ...offerDetails, description: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseOfferModal}>Cancel</Button>
+          <Button onClick={handleSendOffer} variant="contained" color="primary">
+            Send Offer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

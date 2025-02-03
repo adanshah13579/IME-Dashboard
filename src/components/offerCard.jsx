@@ -12,7 +12,7 @@ const OfferCard = () => {
   useEffect(() => {
     const fetchOffer = async () => {
       try {
-        const response = await axios.get(`${baseuri}/api/offer/get-offer/6798c3ddf6ffc3b4167d32f9`);
+        const response = await axios.get(`${baseuri}/api/offer/get-offer/679cf3220b25d3b15689626d`);
         if (response.data.success) {
           setOffer(response.data.offer);  // Set the offer data if the fetch is successful
         } else {
@@ -94,7 +94,7 @@ const OfferCard = () => {
       </CardContent>
 
       {/* Display Accept and Reject buttons if status is "pending" */}
-      {offer.status === "pending" && (
+      {offer.status === "Active" && (
         <Box sx={{ display: "flex", justifyContent: "space-between", padding: "16px" }}>
           <Button
             variant="contained"
@@ -102,7 +102,7 @@ const OfferCard = () => {
             onClick={handleAcceptOffer}
             sx={{ width: "48%" }}
           >
-            Accept Offer
+            Accept
           </Button>
           <Button
             variant="contained"
@@ -110,7 +110,7 @@ const OfferCard = () => {
             onClick={handleRejectOffer}
             sx={{ width: "48%" }}
           >
-            Reject Offer
+            Reject
           </Button>
         </Box>
       )}

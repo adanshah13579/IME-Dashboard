@@ -9,7 +9,7 @@ export const createOffer = async (offerData) => {
         {
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`, // Add the token here
+              Authorization: `Bearer ${token}`, 
             },
     });
     return response.data;
@@ -39,6 +39,7 @@ export const updateOfferStatus = async (offerId, status) => {
   try {
     const token = Cookies.get("token");
     if (!token) throw new Error("No authentication token found");
+console.log("offerid",offerId);
 
     const response = await axios.put(
       `${baseuri}/api/offer/update-status`,
