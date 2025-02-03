@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Container, Box } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Use useNavigate for redirection
-import Cookies from 'js-cookie'; // To store token in cookies if needed
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import { baseuri } from '../../baseuri/baseuri';
 
 const SignUpPage = () => {
@@ -11,12 +11,10 @@ const SignUpPage = () => {
   const [password, setPassword] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // For redirection
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Clear error message
     setError('');
 
     try {
@@ -24,17 +22,13 @@ const SignUpPage = () => {
         name,
         email,
         password,
-        role: 'doctor', // The role is always 'doctor'
+        role: 'doctor',
         specialization,
       });
 
       if (response.status === 201) {
-        // Successful registration
-        // Store token in cookies if the backend sends one
         Cookies.set('token', response.data.token, { expires: 7, path: '/' });
-        
-        // Redirect to login or dashboard
-        navigate('/signin'); // Or redirect to a dashboard
+        navigate('/signin');
       }
     } catch (err) {
       setError('Error: Could not register. Please try again.');
@@ -43,10 +37,19 @@ const SignUpPage = () => {
 
   return (
     <Container maxWidth="xs">
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8 }}>
-        <Typography variant="h5">Sign Up</Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: 8,
+        }}
+      >
+        <Typography variant="h5" sx={{ marginBottom: 4, fontWeight: 600 }}>
+          Sign Up
+        </Typography>
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', marginTop: 2 }}>
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <TextField
             label="Full Name"
             type="text"
@@ -55,6 +58,12 @@ const SignUpPage = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            sx={{
+              borderRadius: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
           />
           <TextField
             label="Email"
@@ -64,6 +73,12 @@ const SignUpPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            sx={{
+              borderRadius: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
           />
           <TextField
             label="Password"
@@ -73,6 +88,12 @@ const SignUpPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            sx={{
+              borderRadius: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
           />
           <TextField
             label="Specialization"
@@ -82,11 +103,35 @@ const SignUpPage = () => {
             value={specialization}
             onChange={(e) => setSpecialization(e.target.value)}
             required
+            sx={{
+              borderRadius: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
           />
-          
-          {error && <Typography color="error">{error}</Typography>}
 
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ marginTop: 2 }}>
+          {error && (
+            <Typography color="error" sx={{ marginTop: 2 }}>
+              {error}
+            </Typography>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{
+              marginTop: 2,
+              padding: '12px 0',
+              fontWeight: 'bold',
+              borderRadius: 2,
+              "&:hover": {
+                backgroundColor: "#3f51b5", // Darken on hover
+              },
+            }}
+          >
             Sign Up
           </Button>
         </form>
@@ -94,7 +139,7 @@ const SignUpPage = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
           <Typography variant="body2">
             Already have an account?{' '}
-            <Button onClick={() => navigate('/signin')} variant="body2">
+            <Button onClick={() => navigate('/signin')} variant="body2" sx={{ fontWeight: 'bold' }}>
               Login here
             </Button>
           </Typography>

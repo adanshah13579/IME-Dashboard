@@ -6,37 +6,42 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
+  Box,
 } from "@mui/material";
 import { createOffer } from "../RestApi/creatOffer";
 
 const CreateOfferModal = ({ open, handleClose }) => {
   const [formData, setFormData] = useState({
     userId: "6796afec77b3bdaa687a0911",
-    price: 0,
-    schedule: "",
+    price: "",
+    schedule: null,
     description: "",
-    estimatedHours: 0,
     name: "",
     profession: "",
   });
 
-  // Handle form input changes
+  // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [e.target.name]: e.target.value,
     });
   };
 
-  // Handle the offer form submission
+  // Handle date picker change
+  const handleDateChange = (newDate) => {
+    setFormData({ ...formData, schedule: newDate });
+  };
+
+  // Submit form
   const handleSubmit = async () => {
     try {
-      console.log("formdta", formData);
+      console.log("Form Data:", formData);
       const response = await createOffer(formData);
       if (response.success) {
         alert("Offer created successfully!");
-        handleClose(); // Close the modal after successful offer creation
+        handleClose();
       } else {
         alert("Failed to create offer.");
       }
@@ -47,69 +52,88 @@ const CreateOfferModal = ({ open, handleClose }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Create Offer</DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontSize: "1.2rem", textAlign: "center" }}>
+        Create Offer
+      </DialogTitle>
       <DialogContent>
-        <TextField
-          label="Price"
-          name="price"
-          type="number"
-          value={formData.price}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Schedule"
-          name="schedule"
-          type="datetime-local"
-          value={formData.schedule}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-        <TextField
-          label="Description"
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Estimated Hours"
-          name="estimatedHours"
-          type="number"
-          value={formData.estimatedHours}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Name"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Profession"
-          name="profession"
-          value={formData.profession}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
+        <Box sx={{ p: 2 }}>
+          <Grid container spacing={2}>
+            {/* Price */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Price"
+                name="price"
+                type="number"
+                value={formData.price}
+                onChange={handleInputChange}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+
+            {/* Date Picker */}
+            <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DesktopDatePicker
+                  label="Schedule"
+                  value={formData.schedule}
+                  onChange={handleDateChange}
+                  inputFormat="MM/dd/yyyy"
+                  renderInput={(params) => (
+                    <TextField {...params} fullWidth size="small" />
+                  )}
+                />
+              </LocalizationProvider>
+            </Grid>
+
+            {/* Description */}
+            <Grid item xs={12}>
+              <TextField
+                label="Description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                fullWidth
+                size="small"
+                multiline
+                rows={3}
+              />
+            </Grid>
+
+            {/* Name */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+
+            {/* Profession */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Profession"
+                name="profession"
+                value={formData.profession}
+                onChange={handleInputChange}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+          </Grid>
+        </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">
+
+      {/* Buttons */}
+      <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+        <Button onClick={handleClose} variant="outlined" size="small">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} color="primary">
+        <Button onClick={handleSubmit} variant="contained" size="small">
           Submit
         </Button>
       </DialogActions>

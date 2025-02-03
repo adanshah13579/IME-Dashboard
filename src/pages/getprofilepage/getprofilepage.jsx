@@ -52,7 +52,7 @@ const GetProfilePage = () => {
 
         setProfile(response.data);
       } catch (err) {
-        setError("Failed to fetch profile");
+        setError("set up your profile");
         console.error("Error fetching doctor profile:", err);
       } finally {
         setLoading(false);

@@ -6,7 +6,7 @@ import Commentbox from "./commentbox.jsx";
 import { io } from "socket.io-client";
 import Cookies from "js-cookie";
 import { formatDistanceToNow } from "date-fns";
-import OfferCard from "./offerdetails.jsx"; // Import the OfferCard component
+import OfferCard from "./offerdetails.jsx"; // Import OfferCard
 
 const Chatbox = ({ setChatState, selectedUser, name }) => {
   const [messages, setMessages] = useState([]);
@@ -16,7 +16,7 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
 
   useEffect(() => {
     if (!selectedUser?.id) return;
-
+  
     const newSocket = io("ws://localhost:3001?token=" + token, {
       transports: ["websocket"],
       forceNew: true,
@@ -26,58 +26,67 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
+  
     setSocket(newSocket);
-
+  
     newSocket.on("connect", () => {
       console.log("Connected to WebSocket server");
-
       newSocket.emit("get_recent_messages", { userId: selectedUser.id });
     });
-
+  
     newSocket.on("receive_message", (data) => {
       console.log("Received message data:", data);
-
-      if (data.type === "newChatMessage") {
-        const createdAt = data.createdAt ? new Date(data.createdAt) : null;
-
-        if (data.receiverId === selectedUser.id || data.senderId === selectedUser.id) {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              senderType: data.senderType,
-              createdAt: createdAt
-                ? formatDistanceToNow(createdAt, { addSuffix: true })
-                : "Just now",
-              message: data.message,
-              offerDetails: data.offerDetails || null, // Add offerDetails if they exist
-            },
-          ]);
-        }
-      }
-
+  
       if (data.type === "recentChats") {
         const filteredMessages = data.recentMessages.recentMessages.filter(
           (msg) => msg.sender === selectedUser.id || msg.receiver === selectedUser.id
         );
-
-        const formattedMessages = filteredMessages.map((msg) => ({
-          senderType: msg.senderType,
-          createdAt: msg.createdAt
-            ? formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })
-            : "Just now",
-          message: msg.message,
-          offerDetails: msg.offerDetails || null, // Add offerDetails if they exist
-        }));
-
+  
+        const formattedMessages = filteredMessages.map((msg) => {
+          let parsedOffer = null;
+  
+          if (msg.typeOfMessage === "offer" && msg.message) {
+            try {
+              parsedOffer = JSON.parse(msg.message);
+            } catch (err) {
+              console.error("Error parsing offer message:", err);
+            }
+          }
+  
+          return {
+            senderType: msg.senderType,
+            createdAt: msg.createdAt
+              ? formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })
+              : "Just now",
+            message: parsedOffer ? parsedOffer : msg.message,
+            offerDetails: parsedOffer || null,
+          };
+        });
+  
         setMessages(formattedMessages);
       }
     });
-
+  
+    // Handle the offer_sent event
+    newSocket.on("offer_sent", (data) => {
+      console.log("Offer sent confirmation received:", data);
+  
+      const newOfferMessage = {
+        senderType: "doctor", 
+        createdAt: formatDistanceToNow(new Date(), { addSuffix: true }),
+        message: data.offerDetails, 
+        offerDetails: data.offerDetails,
+        offerId: data.offerId, 
+      };
+  
+      setMessages((prevMessages) => [...prevMessages, newOfferMessage]);
+    });
+  
     return () => {
       newSocket.disconnect();
     };
   }, [token, selectedUser]);
+  
 
   const sendMessage = (message) => {
     if (!socket) {
@@ -86,17 +95,28 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
     }
 
     const receiverId = selectedUser?.id;
-    socket.emit("send_message", { receiverId, message });
+    const messageContent = message.message || message;
+    socket.emit("send_message", { receiverId, message: messageContent });
   };
 
-  const sendOffer = (offerDetails) => {
+  const sendOffer = (offerData) => {
     if (!socket) {
       console.error("Socket not initialized");
       return;
     }
 
-    const receiverId = selectedUser?.id;
-    socket.emit("send_offer", { receiverId, offerDetails });
+    if (!selectedUser?.id) {
+      console.error("No user selected to send the offer to");
+      return;
+    }
+
+    const offerDetails = {
+      receiverId: selectedUser.id,
+      offerData,
+    };
+
+    console.log("Sending offer:", offerDetails);
+    socket.emit("send_offer", offerDetails);
   };
 
   return (
@@ -125,24 +145,30 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
           {name?.name || "User"}
         </Typography>
       </Box>
-
       <Box sx={{ flex: 1, padding: "20px 10px", overflowY: "auto" }}>
-        {messages.length === 0 ? (
-          <Typography>No messages yet...</Typography>
+  {messages.length === 0 ? (
+    <Typography>No messages yet...</Typography>
+  ) : (
+    messages.map((msg, index) => (
+      <div key={index}>
+        {msg.offerDetails ? (
+          <OfferCard offerDetails={msg.offerDetails} offerId={msg.offerId}  senderType={msg.senderType}
+          time={msg.createdAt}        selectedUserId={selectedUser.id} 
+/>
         ) : (
-          messages.map((msg, index) => (
-            <div key={index}>
-              <ChatMessage
-                senderType={msg.senderType}
-                time={msg.createdAt}
-                message={msg.message}
-              />
-              {/* If the message is an offer, render the OfferCard */}
-              {msg.offerDetails && <OfferCard offerDetails={msg.offerDetails} />}
-            </div>
-          ))
+          <ChatMessage
+            senderType={msg.senderType}
+            time={msg.createdAt}
+            message={msg.message}
+          />
         )}
-      </Box>
+      </div>
+    ))
+  )}
+</Box>
+
+
+
 
       <Box
         sx={{

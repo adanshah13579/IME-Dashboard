@@ -39,6 +39,8 @@ const ChatsystemPage = () => {
     newSocket.on("receive_message", (data) => {
 
       if (data.type === "chatlist") {
+        console.log("chatdrawer data", data);
+        
         const formattedChats = data.chatlist.map((chat) => ({
           _id: chat._id, // Chat partner's ID
           name: chat.name, // Chat partner's name

@@ -200,14 +200,14 @@ const Commentbox = ({ sendMessage, sendOffer,  }) => {
             onChange={(e) => setOfferDetails({ ...offerDetails, schedule: e.target.value })}
             sx={{ marginBottom: 2 }}
           />
-          <TextField
+          {/* <TextField
             label="Estimated Hours"
             fullWidth
             type="number"
             value={offerDetails.estimatedHours}
             onChange={(e) => setOfferDetails({ ...offerDetails, estimatedHours: e.target.value })}
             sx={{ marginBottom: 2 }}
-          />
+          /> */}
           <TextField
             label="Description"
             fullWidth
