@@ -6,21 +6,19 @@ import { useState } from "react";
 
 const ChatDrawer = ({ setChatState, recentChats, setname }) => {
   const [expandDirect, setExpandDirect] = useState(false);
-  const [activeChat, setActiveChat] = useState(null); // Initially set to null
+  const [activeChat, setActiveChat] = useState(null); 
 
-  // Handle user selection and pass user ID to the parent
   const handleChatSelection = (chat) => {
     setActiveChat(chat.name); // Set active chat for UI
     setChatState(chat._id);
     setname(chat.name); // Set active chat for UI
   };
 
-  // Function to truncate long messages
   const truncateMessage = (message, maxLength = 30) => {
     if (message && message.length > maxLength) {
       return message.substring(0, maxLength) + "...";
     }
-    return message || ""; // Return empty string if message is null or undefined
+    return message || ""; 
   };
 
   return (
@@ -96,20 +94,16 @@ const ChatDrawer = ({ setChatState, recentChats, setname }) => {
                   </Typography>
                 </Box>
                 
-                {/* Last message text */}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "14px",
-                    color: "grey",
-                    textAlign: "left", // Center the text below the name
-                    marginTop: "4px",
-                  }}
-                >
-                  {chat.lastMessage === "offer"
-                    ? "Sent you an offer card"
-                    : truncateMessage(chat.lastMessage)}
-                </Typography>
+                <Typography variant="body2" sx={{ fontSize: "14px", color: "grey", textAlign: "left", marginTop: "4px" }}>
+  {(() => {
+    try {
+      const messageObj = JSON.parse(chat.lastMessage || "{}");
+      return messageObj.type === "offer" ? "Sent you an offer " : truncateMessage(chat.lastMessage);
+    } catch {
+      return truncateMessage(chat.lastMessage);
+    }
+  })()}
+</Typography>
               </Box>
             </ListItem>
           ))

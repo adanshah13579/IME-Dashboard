@@ -35,7 +35,6 @@ const MainLayout = () => {
     { text: "Orders", icon: <Assignment />, path: "/orders" },
     { text: "Create Profile", icon: <PersonAdd />, path: "/create-profile" },
     { text: "Profile", icon: <AccountCircle />, path: "/profile" },
-    { text: "Create Offer", icon: <AddCircle />, path: "/create-offer" },
     { text: "Chat", icon: <Forum />, path: "/chatpage" },
     { text: "Logout", icon: <Logout />, path: "/signin" },
   ];

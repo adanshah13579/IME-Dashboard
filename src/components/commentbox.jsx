@@ -15,6 +15,10 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import MicIcon from "@mui/icons-material/Mic";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import DatePicker from "react-datepicker"; // Import DatePicker
+import "react-datepicker/dist/react-datepicker.css"; // Import styles
+import styled from "styled-components"; // For custom styling
+
 
 const Commentbox = ({ sendMessage, sendOffer,  }) => {
   const [message, setMessage] = useState("");
@@ -27,6 +31,18 @@ const Commentbox = ({ sendMessage, sendOffer,  }) => {
     estimatedHours: "",
     description: "",
   });
+  const StyledDatePicker = styled(DatePicker)`
+  width: 100%;
+  height: 40px;
+  padding: 8px 14px;
+  border: 1px solid #c4c4c4;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  &:focus {
+    border-color: #1976d2;
+  }
+`;
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -168,62 +184,106 @@ const Commentbox = ({ sendMessage, sendOffer,  }) => {
       <Divider sx={{ marginTop: "10px", backgroundColor: "#ccc" }} />
 
       {/* Offer Modal */}
-      <Dialog open={offerModalOpen} onClose={handleCloseOfferModal}>
-        <DialogTitle>Create an Offer</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="User Name"
-            fullWidth
-            value={offerDetails.name}
-            onChange={(e) => setOfferDetails({ ...offerDetails, name: e.target.value })}
-            sx={{ marginBottom: 2 }}
-          />
-          <TextField
-            label="Profession"
-            fullWidth
-            value={offerDetails.profession}
-            onChange={(e) => setOfferDetails({ ...offerDetails, profession: e.target.value })}
-            sx={{ marginBottom: 2 }}
-          />
-          <TextField
-            label="Price"
-            fullWidth
-            type="number"
-            value={offerDetails.price}
-            onChange={(e) => setOfferDetails({ ...offerDetails, price: e.target.value })}
-            sx={{ marginBottom: 2 }}
-          />
-          <TextField
-            label="Schedule (e.g., Monday 3 PM)"
-            fullWidth
-            value={offerDetails.schedule}
-            onChange={(e) => setOfferDetails({ ...offerDetails, schedule: e.target.value })}
-            sx={{ marginBottom: 2 }}
-          />
-          {/* <TextField
-            label="Estimated Hours"
-            fullWidth
-            type="number"
-            value={offerDetails.estimatedHours}
-            onChange={(e) => setOfferDetails({ ...offerDetails, estimatedHours: e.target.value })}
-            sx={{ marginBottom: 2 }}
-          /> */}
-          <TextField
-            label="Description"
-            fullWidth
-            multiline
-            rows={3}
-            value={offerDetails.description}
-            onChange={(e) => setOfferDetails({ ...offerDetails, description: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseOfferModal}>Cancel</Button>
-          <Button onClick={handleSendOffer} variant="contained" color="primary">
-            Send Offer
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Dialog 
+  open={offerModalOpen} 
+  onClose={handleCloseOfferModal} 
+  fullWidth 
+  maxWidth="sm" // Keeps the modal width reasonable
+  sx={{ '& .MuiPaper-root': { borderRadius: 2, padding: 2 } }}
+>
+  <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold' }}>Create an Offer</DialogTitle>
+  <DialogContent>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt:1 }}>
+      <TextField
+        label="Enter Client Name"
+        fullWidth
+        variant="outlined"
+        size="small"
+        value={offerDetails.name}
+        onChange={(e) => setOfferDetails({ ...offerDetails, name: e.target.value })}
+      />
+      <TextField
+        label="Enter Client Profession"
+        fullWidth
+        variant="outlined"
+        size="small"
+        value={offerDetails.profession}
+        onChange={(e) => setOfferDetails({ ...offerDetails, profession: e.target.value })}
+      />
+      <TextField
+        label="Price"
+        fullWidth
+        variant="outlined"
+        size="small"
+        type="number"
+        value={offerDetails.price}
+        onChange={(e) => setOfferDetails({ ...offerDetails, price: e.target.value })}
+      />
+   
+      <TextField
+        label="Estimated Hours"
+        fullWidth
+        variant="outlined"
+        size="small"
+        type="number"
+        value={offerDetails.estimatedHours}
+        onChange={(e) => setOfferDetails({ ...offerDetails, estimatedHours: e.target.value })}
+      />
+      <TextField
+        label="Description"
+        fullWidth
+        variant="outlined"
+        size="small"
+        multiline
+        rows={3}
+        value={offerDetails.description}
+        onChange={(e) => setOfferDetails({ ...offerDetails, description: e.target.value })}
+      />
+       <Box sx={{ display: "flex", flexDirection: "column", }}>
+            
+            <StyledDatePicker
+              selected={offerDetails.schedule}
+              onChange={(date) => setOfferDetails({ ...offerDetails, schedule: date })}
+              showTimeSelect
+              dateFormat="MMMM d, yyyy h:mm aa"
+              placeholderText="Select  your Schedule"
+            />
+          </Box>
+    </Box>
+  </DialogContent>
+  <DialogActions sx={{ justifyContent: 'center', paddingBottom: 2 }}>
+    <Button 
+    onClick={handleCloseOfferModal} 
+    
+    sx={{
+      minWidth:"120px",
+      bgcolor: 'black', 
+      color: 'white', 
+      '&:hover': { bgcolor: 'grey.800' }, 
+      height: 40, // Ensures equal height
+    }}
+  >
+    Cancel
+  </Button>
+  <Button 
+    onClick={handleSendOffer} 
+    variant="contained" 
+    
+    sx={{
+      minWidth:"120",
+
+      bgcolor: 'white', 
+      color: 'black', 
+      border: '1px solid black', 
+      '&:hover': { bgcolor: 'grey.100' },
+      height: 40, // Ensures equal height
+    }}
+  >
+    Send Offer
+  </Button>
+  </DialogActions>
+</Dialog>
+
     </Box>
   );
 };

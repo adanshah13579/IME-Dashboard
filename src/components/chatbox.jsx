@@ -6,11 +6,13 @@ import Commentbox from "./commentbox.jsx";
 import { io } from "socket.io-client";
 import Cookies from "js-cookie";
 import { formatDistanceToNow } from "date-fns";
-import OfferCard from "./offerdetails.jsx"; // Import OfferCard
+import OfferCard from "./offerCard.jsx";
 
 const Chatbox = ({ setChatState, selectedUser, name }) => {
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
+
+  
 
   const token = Cookies.get("token");
 
@@ -35,7 +37,9 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
     });
   
     newSocket.on("receive_message", (data) => {
-      console.log("Received message data:", data);
+
+      console.log("dataaa",data);
+
   
       if (data.type === "recentChats") {
         const filteredMessages = data.recentMessages.recentMessages.filter(
@@ -60,6 +64,8 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
               : "Just now",
             message: parsedOffer ? parsedOffer : msg.message,
             offerDetails: parsedOffer || null,
+            offerId: msg.offerId || null, // Ensure offerId is passed
+
           };
         });
   
@@ -67,7 +73,6 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
       }
     });
   
-    // Handle the offer_sent event
     newSocket.on("offer_sent", (data) => {
       console.log("Offer sent confirmation received:", data);
   
@@ -76,7 +81,7 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
         createdAt: formatDistanceToNow(new Date(), { addSuffix: true }),
         message: data.offerDetails, 
         offerDetails: data.offerDetails,
-        offerId: data.offerId, 
+        offerId: data.offerId, // Ensure offerId is included
       };
   
       setMessages((prevMessages) => [...prevMessages, newOfferMessage]);
@@ -111,7 +116,7 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
     }
 
     const offerDetails = {
-      receiverId: selectedUser.id,
+      receiverId: selectedUser?.id,
       offerData,
     };
 
@@ -152,7 +157,8 @@ const Chatbox = ({ setChatState, selectedUser, name }) => {
     messages.map((msg, index) => (
       <div key={index}>
         {msg.offerDetails ? (
-          <OfferCard offerDetails={msg.offerDetails} offerId={msg.offerId}  senderType={msg.senderType}
+          <OfferCard offerDetails={msg.offerDetails}   offerId={msg.offerId}  // Ensure offerId is passed
+          senderType={msg.senderType}
           time={msg.createdAt}        selectedUserId={selectedUser.id} 
 />
         ) : (

@@ -128,7 +128,6 @@ const CreateOfferModal = ({ open, handleClose }) => {
         </Box>
       </DialogContent>
 
-      {/* Buttons */}
       <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
         <Button onClick={handleClose} variant="outlined" size="small">
           Cancel

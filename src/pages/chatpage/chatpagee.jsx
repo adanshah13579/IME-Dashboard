@@ -8,10 +8,10 @@ import { formatDistanceToNow } from "date-fns";
 
 const ChatsystemPage = () => {
   const [chatOpen, setChatOpen] = useState(false);
-  const [recentChats, setRecentChats] = useState([]); // Store recent chats
-  const [socket, setSocket] = useState(null); // Socket connection state
-  const [selectedUser, setSelectedUser] = useState(null); // Track selected user
-  const [name, setname ] = useState(""); // Track selected user
+  const [recentChats, setRecentChats] = useState([]); 
+  const [socket, setSocket] = useState(null); 
+  const [selectedUser, setSelectedUser] = useState(null); 
+  const [name, setname ] = useState(""); 
 
 
   const token = Cookies.get("token");
